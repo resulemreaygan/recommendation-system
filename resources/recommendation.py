@@ -14,6 +14,7 @@ parser.add_argument('algorithm', type=str, required=False, default='fpgrowth')
 parser.add_argument('min_support', type=float, required=False, default=0.003)
 parser.add_argument('metric', type=str, required=False, default='lift')
 parser.add_argument('metric_threshold', type=float, required=False, default=1.0)
+parser.add_argument('product_number', type=int, required=False, default=10)
 
 
 class Recommendation(Resource):
@@ -81,4 +82,7 @@ class Recommendation(Resource):
                     temp_df.append(self.rule_set[self.rule_set['antecedents'] == frozenset({value})].sort_values(
                         by="lift", ascending=False))
 
-        return json.dumps(json.loads(temp_df.to_json(orient="records")), indent=4), 200
+        if params['product_number'] > len(temp_df):
+            params['product_number'] = len(temp_df)
+
+        return json.dumps(json.loads(temp_df[:params['product_number']].to_json(orient="records")), indent=4), 200
